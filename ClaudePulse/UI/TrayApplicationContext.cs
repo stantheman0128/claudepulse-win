@@ -11,6 +11,9 @@ public class TrayApplicationContext : ApplicationContext
     private readonly SessionManager _sessionManager;
     private readonly System.Windows.Forms.Timer _stalenessTimer;
 
+    // Track last notification's session for click-to-jump
+    private SessionInfo? _lastNotificationSession;
+
     public TrayApplicationContext()
     {
         _sessionManager = new SessionManager();
@@ -27,6 +30,17 @@ public class TrayApplicationContext : ApplicationContext
             Text = "ClaudePulse - No active sessions",
             Visible = true,
             ContextMenuStrip = contextMenu
+        };
+
+        // Click on balloon tip → jump to session
+        _trayIcon.BalloonTipClicked += (_, _) =>
+        {
+            if (_lastNotificationSession != null)
+            {
+                WindowActivator.TryActivateSession(
+                    _lastNotificationSession.Cwd,
+                    _lastNotificationSession.Id);
+            }
         };
 
         // Update icon when sessions change
@@ -46,7 +60,7 @@ public class TrayApplicationContext : ApplicationContext
         {
             _trayIcon.Text = $"ClaudePulse (:{_server.Port}) - No active sessions";
 
-            // Check if hooks are configured on first launch - auto-configure
+            // Auto-configure hooks on first launch
             if (!HookConfigurator.AreHooksConfigured(_server.Port))
             {
                 ConfigureHooks();
@@ -77,18 +91,22 @@ public class TrayApplicationContext : ApplicationContext
         switch (evt.HookEventName)
         {
             case "Stop":
+                _lastNotificationSession = session;
                 _trayIcon.ShowBalloonTip(5000, "Task Complete",
-                    $"{session.ProjectName}: Claude finished working", ToolTipIcon.Info);
+                    $"{session.ProjectName}: Claude finished working\n(click to jump to session)",
+                    ToolTipIcon.Info);
                 break;
 
             case "Notification":
+                _lastNotificationSession = session;
                 _trayIcon.ShowBalloonTip(5000,
                     evt.Title ?? "Claude Code",
-                    evt.Message ?? "Notification received",
+                    (evt.Message ?? "Notification received") + "\n(click to jump to session)",
                     ToolTipIcon.Warning);
                 break;
 
             case "SessionEnd" when _sessionManager.Sessions.Count == 0:
+                _lastNotificationSession = session;
                 _trayIcon.ShowBalloonTip(3000, "Session Ended",
                     $"{session.ProjectName}: All sessions closed", ToolTipIcon.Info);
                 break;
@@ -107,7 +125,6 @@ public class TrayApplicationContext : ApplicationContext
         };
 
         var port = _server.Port > 0 ? $"(:{_server.Port}) " : "";
-        // NotifyIcon.Text has a 127 char limit
         var summary = _sessionManager.StatusSummary;
         var text = $"ClaudePulse {port}- {summary}";
         _trayIcon.Text = text.Length > 127 ? text[..127] : text;
@@ -124,7 +141,7 @@ public class TrayApplicationContext : ApplicationContext
 
         menu.Items.Add(new ToolStripSeparator());
 
-        // Session list
+        // Session list - clickable to jump to session
         if (_sessionManager.Sessions.Count > 0)
         {
             foreach (var session in _sessionManager.Sessions.Values)
@@ -136,8 +153,9 @@ public class TrayApplicationContext : ApplicationContext
                     SessionState.Stale => "⚪",
                     _ => "🟢"
                 };
-                var item = menu.Items.Add($"{stateEmoji} {session.ProjectName} - {session.ElapsedDisplay}");
-                item.Enabled = false;
+                var s = session; // capture for closure
+                var item = menu.Items.Add($"{stateEmoji} {session.ProjectName} - {session.ElapsedDisplay}",
+                    null, (_, _) => WindowActivator.TryActivateSession(s.Cwd, s.Id));
             }
         }
         else
