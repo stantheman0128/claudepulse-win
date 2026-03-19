@@ -6,10 +6,14 @@ namespace ClaudePulse.UI;
 
 public class TrayApplicationContext : ApplicationContext
 {
-    private readonly NotifyIcon _trayIcon;
+    private NotifyIcon _trayIcon = null!;
     private readonly HookHttpServer _server;
     private readonly SessionManager _sessionManager;
     private readonly System.Windows.Forms.Timer _stalenessTimer;
+
+    // Debounce: only notify if idle for 3 seconds after Stop
+    private readonly System.Windows.Forms.Timer _notifyDebounceTimer;
+    private SessionInfo? _pendingNotifySession;
 
     // Track last notification's session for click-to-jump
     private SessionInfo? _lastNotificationSession;
@@ -17,6 +21,22 @@ public class TrayApplicationContext : ApplicationContext
     public TrayApplicationContext()
     {
         _sessionManager = new SessionManager();
+
+        // Debounce timer - fires 3s after last Stop, cancelled by new working events
+        _notifyDebounceTimer = new System.Windows.Forms.Timer { Interval = 3000 };
+        _notifyDebounceTimer.Tick += (_, _) =>
+        {
+            _notifyDebounceTimer.Stop();
+            var session = _pendingNotifySession;
+            if (session != null)
+            {
+                _lastNotificationSession = session;
+                _trayIcon.ShowBalloonTip(5000, "Claude Code Ready",
+                    $"{session.ProjectName}: Waiting for your input\n(click to jump)",
+                    ToolTipIcon.Info);
+                _pendingNotifySession = null;
+            }
+        };
 
         // Build context menu
         var contextMenu = new ContextMenuStrip();
@@ -60,7 +80,6 @@ public class TrayApplicationContext : ApplicationContext
         {
             _trayIcon.Text = $"ClaudePulse (:{_server.Port}) - No active sessions";
 
-            // Auto-configure hooks on first launch
             if (!HookConfigurator.AreHooksConfigured(_server.Port))
             {
                 ConfigureHooks();
@@ -91,24 +110,37 @@ public class TrayApplicationContext : ApplicationContext
         switch (evt.HookEventName)
         {
             case "Stop":
-                _lastNotificationSession = session;
-                _trayIcon.ShowBalloonTip(5000, "Task Complete",
-                    $"{session.ProjectName}: Claude finished working\n(click to jump to session)",
-                    ToolTipIcon.Info);
+                // Don't notify immediately — start debounce timer.
+                // If Claude starts working again within 3s, the timer gets cancelled.
+                _pendingNotifySession = session;
+                _notifyDebounceTimer.Stop();
+                _notifyDebounceTimer.Start();
                 break;
 
-            case "Notification":
+            case "UserPromptSubmit":
+            case "PreToolUse":
+            case "PostToolUse":
+                // Claude is working again — cancel pending notification
+                _notifyDebounceTimer.Stop();
+                _pendingNotifySession = null;
+                break;
+
+            case "Notification" when evt.NotificationType == "permission_prompt":
+                // Permission prompts are important — notify immediately
+                _notifyDebounceTimer.Stop();
+                _pendingNotifySession = null;
                 _lastNotificationSession = session;
                 _trayIcon.ShowBalloonTip(5000,
-                    evt.Title ?? "Claude Code",
-                    (evt.Message ?? "Notification received") + "\n(click to jump to session)",
+                    "Permission Needed",
+                    $"{session.ProjectName}: Claude needs your approval\n(click to jump)",
                     ToolTipIcon.Warning);
                 break;
 
+            // Ignore other Notification types (plugin noise like "Double Shot Latte" etc.)
+
             case "SessionEnd" when _sessionManager.Sessions.Count == 0:
-                _lastNotificationSession = session;
-                _trayIcon.ShowBalloonTip(3000, "Session Ended",
-                    $"{session.ProjectName}: All sessions closed", ToolTipIcon.Info);
+                _notifyDebounceTimer.Stop();
+                _pendingNotifySession = null;
                 break;
         }
     }
@@ -134,14 +166,12 @@ public class TrayApplicationContext : ApplicationContext
     {
         menu.Items.Clear();
 
-        // Header
         var header = menu.Items.Add("ClaudePulse");
         header.Enabled = false;
         header.Font = new System.Drawing.Font(header.Font, System.Drawing.FontStyle.Bold);
 
         menu.Items.Add(new ToolStripSeparator());
 
-        // Session list - clickable to jump to session
         if (_sessionManager.Sessions.Count > 0)
         {
             foreach (var session in _sessionManager.Sessions.Values)
@@ -153,8 +183,8 @@ public class TrayApplicationContext : ApplicationContext
                     SessionState.Stale => "⚪",
                     _ => "🟢"
                 };
-                var s = session; // capture for closure
-                var item = menu.Items.Add($"{stateEmoji} {session.ProjectName} - {session.ElapsedDisplay}",
+                var s = session;
+                menu.Items.Add($"{stateEmoji} {session.ProjectName} - {session.ElapsedDisplay}",
                     null, (_, _) => WindowActivator.TryActivateSession(s.Cwd, s.Id));
             }
         }
@@ -177,6 +207,8 @@ public class TrayApplicationContext : ApplicationContext
 
     private void ExitApp()
     {
+        _notifyDebounceTimer.Stop();
+        _notifyDebounceTimer.Dispose();
         _stalenessTimer.Stop();
         _stalenessTimer.Dispose();
         _trayIcon.Visible = false;
