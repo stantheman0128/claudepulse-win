@@ -30,7 +30,7 @@ public static class WindowActivator
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
-    [DllImport("user32.dll")]
+    [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
     [DllImport("user32.dll")]
