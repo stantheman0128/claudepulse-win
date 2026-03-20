@@ -1,5 +1,7 @@
 # ClaudePulse for Windows
 
+[繁體中文](README.zh-TW.md) | English
+
 A Windows system tray monitor for [Claude Code](https://claude.ai/claude-code) sessions — inspired by [ClaudePulse](https://github.com/tzangms/claudepulse) (macOS).
 
 > The original ClaudePulse is a beautiful macOS menu bar app. This project brings the same concept to Windows, with additional features not found in the original.
