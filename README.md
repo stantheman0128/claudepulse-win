@@ -34,7 +34,8 @@ Features that the macOS version doesn't have:
 
 <img width="612" height="389" alt="image" src="https://github.com/user-attachments/assets/da161885-8fac-4140-bcf3-fe38eeb3b74b" />
 
-<img width="335" height="236" alt="image" src="https://github.com/user-attachments/assets/b5238be3-68d1-473d-93a8-4fabf5c12081" />
+<img width="355" height="307" alt="image" src="https://github.com/user-attachments/assets/b017b3b4-f238-44be-9640-6494cb82f421" />
+
 
 
 
