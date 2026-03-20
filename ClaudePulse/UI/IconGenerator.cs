@@ -47,16 +47,22 @@ public static class IconGenerator
 
     private static Bitmap CreateCircleBitmap(Color color)
     {
-        var bmp = new Bitmap(16, 16);
+        const int size = 32;
+        var bmp = new Bitmap(size, size);
         using var g = Graphics.FromImage(bmp);
         g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.Clear(Color.Transparent);
 
-        using var brush = new SolidBrush(color);
-        g.FillEllipse(brush, 2, 2, 12, 12);
+        var margin = size / 6;
+        var circleSize = size - margin * 2;
 
-        using var pen = new Pen(Color.FromArgb(80, 0, 0, 0), 0.5f);
-        g.DrawEllipse(pen, 2, 2, 12, 12);
+        using var brush = new SolidBrush(color);
+        g.FillEllipse(brush, margin, margin, circleSize, circleSize);
+
+        using var pen = new Pen(Color.FromArgb(80, 0, 0, 0), 1f);
+        g.DrawEllipse(pen, margin, margin, circleSize, circleSize);
 
         return bmp;
     }

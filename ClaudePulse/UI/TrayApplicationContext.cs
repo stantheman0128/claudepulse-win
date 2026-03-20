@@ -103,8 +103,21 @@ public class TrayApplicationContext : ApplicationContext
             success ? ToolTipIcon.Info : ToolTipIcon.Error);
     }
 
+    // Paths that indicate plugin-spawned subprocess sessions
+    private static readonly string[] IgnoredPaths = { "double-shot-latte", ".claude/hooks", ".claude\\hooks" };
+
+    private static bool IsPluginEvent(HookEvent evt)
+    {
+        if (string.IsNullOrEmpty(evt.Cwd)) return false;
+        var normalized = evt.Cwd.Replace('\\', '/');
+        return IgnoredPaths.Any(p => normalized.Contains(p, StringComparison.OrdinalIgnoreCase));
+    }
+
     private void HandleHookEvent(HookEvent evt)
     {
+        // Drop all events from plugin subprocesses
+        if (IsPluginEvent(evt)) return;
+
         var session = _sessionManager.HandleEvent(evt);
 
         switch (evt.HookEventName)
