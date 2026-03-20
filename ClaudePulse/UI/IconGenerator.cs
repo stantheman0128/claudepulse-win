@@ -63,17 +63,24 @@ public static class IconGenerator
 
     private static Icon CreateCircleIcon(Color color)
     {
-        var bmp = new Bitmap(16, 16);
+        // Use 48x48 for high-DPI sharpness (Windows scales down as needed)
+        const int size = 48;
+        var bmp = new Bitmap(size, size);
         using var g = Graphics.FromImage(bmp);
         g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.Clear(Color.Transparent);
 
+        var margin = size / 8;
+        var circleSize = size - margin * 2;
+
         using var brush = new SolidBrush(color);
-        g.FillEllipse(brush, 1, 1, 13, 13);
+        g.FillEllipse(brush, margin, margin, circleSize, circleSize);
 
         // Subtle border
-        using var pen = new Pen(Color.FromArgb(60, 0, 0, 0), 0.5f);
-        g.DrawEllipse(pen, 1, 1, 13, 13);
+        using var pen = new Pen(Color.FromArgb(60, 0, 0, 0), 1.5f);
+        g.DrawEllipse(pen, margin, margin, circleSize, circleSize);
 
         var hIcon = bmp.GetHicon();
         var icon = Icon.FromHandle(hIcon);
