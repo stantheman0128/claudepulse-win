@@ -27,6 +27,40 @@ public static class IconGenerator
         return icon;
     }
 
+    // Menu item images (Bitmap, not Icon)
+    private static readonly Dictionary<string, Bitmap> _bmpCache = new();
+
+    public static Bitmap IdleBmp => GetOrCreateBmp("idle", Color.FromArgb(76, 175, 80));
+    public static Bitmap WorkingBmp => GetOrCreateBmp("working", Color.FromArgb(33, 150, 243));
+    public static Bitmap WaitingBmp => GetOrCreateBmp("waiting", Color.FromArgb(255, 152, 0));
+    public static Bitmap StaleBmp => GetOrCreateBmp("stale", Color.FromArgb(158, 158, 158));
+
+    private static Bitmap GetOrCreateBmp(string key, Color color)
+    {
+        if (_bmpCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var bmp = CreateCircleBitmap(color);
+        _bmpCache[key] = bmp;
+        return bmp;
+    }
+
+    private static Bitmap CreateCircleBitmap(Color color)
+    {
+        var bmp = new Bitmap(16, 16);
+        using var g = Graphics.FromImage(bmp);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Color.Transparent);
+
+        using var brush = new SolidBrush(color);
+        g.FillEllipse(brush, 2, 2, 12, 12);
+
+        using var pen = new Pen(Color.FromArgb(80, 0, 0, 0), 0.5f);
+        g.DrawEllipse(pen, 2, 2, 12, 12);
+
+        return bmp;
+    }
+
     private static Icon CreateCircleIcon(Color color)
     {
         var bmp = new Bitmap(16, 16);
@@ -43,7 +77,6 @@ public static class IconGenerator
 
         var hIcon = bmp.GetHicon();
         var icon = Icon.FromHandle(hIcon);
-        // Clone to own the icon data, then destroy the GDI handle
         var cloned = (Icon)icon.Clone();
         DestroyIcon(hIcon);
         return cloned;

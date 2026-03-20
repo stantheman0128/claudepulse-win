@@ -148,13 +148,21 @@ public class TrayApplicationContext : ApplicationContext
     private void UpdateTrayState()
     {
         var state = _sessionManager.AggregateState;
-        _trayIcon.Icon = state switch
+        var newIcon = state switch
         {
             SessionState.Working => IconGenerator.Working,
             SessionState.WaitingForUser => IconGenerator.Waiting,
             SessionState.Stale => IconGenerator.Stale,
             _ => IconGenerator.Idle
         };
+
+        // Force refresh: Windows system tray caches icons and ignores same-object assignments
+        if (_trayIcon.Icon != newIcon)
+        {
+            _trayIcon.Visible = false;
+            _trayIcon.Icon = newIcon;
+            _trayIcon.Visible = true;
+        }
 
         var port = _server.Port > 0 ? $"(:{_server.Port}) " : "";
         var summary = _sessionManager.StatusSummary;
@@ -176,16 +184,26 @@ public class TrayApplicationContext : ApplicationContext
         {
             foreach (var session in _sessionManager.Sessions.Values)
             {
-                var stateEmoji = session.State switch
+                var stateImage = session.State switch
                 {
-                    SessionState.Working => "🔵",
-                    SessionState.WaitingForUser => "🟠",
-                    SessionState.Stale => "⚪",
-                    _ => "🟢"
+                    SessionState.Working => IconGenerator.WorkingBmp,
+                    SessionState.WaitingForUser => IconGenerator.WaitingBmp,
+                    SessionState.Stale => IconGenerator.StaleBmp,
+                    _ => IconGenerator.IdleBmp
+                };
+                var stateLabel = session.State switch
+                {
+                    SessionState.Working => "Working",
+                    SessionState.WaitingForUser => "Waiting",
+                    SessionState.Stale => "Stale",
+                    _ => "Idle"
                 };
                 var s = session;
-                menu.Items.Add($"{stateEmoji} {session.ProjectName} - {session.ElapsedDisplay}",
-                    null, (_, _) => WindowActivator.TryActivateSession(s.Cwd, s.Id));
+                var item = new ToolStripMenuItem(
+                    $"{session.ProjectName} - {stateLabel} - {session.ElapsedDisplay}",
+                    stateImage,
+                    (_, _) => WindowActivator.TryActivateSession(s.Cwd, s.Id));
+                menu.Items.Add(item);
             }
         }
         else

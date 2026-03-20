@@ -33,8 +33,22 @@ public class SessionManager
         }
     }
 
+    // Paths that indicate plugin-spawned subprocess sessions (not real user sessions)
+    private static readonly string[] IgnoredPaths = { "double-shot-latte", ".claude/hooks" };
+
+    private static bool IsPluginSession(string? cwd)
+    {
+        if (string.IsNullOrEmpty(cwd)) return false;
+        var normalized = cwd.Replace('\\', '/');
+        return IgnoredPaths.Any(p => normalized.Contains(p, StringComparison.OrdinalIgnoreCase));
+    }
+
     public SessionInfo HandleEvent(HookEvent evt)
     {
+        // Filter out plugin-spawned subprocess sessions
+        if (IsPluginSession(evt.Cwd))
+            return new SessionInfo { Id = evt.SessionId, Cwd = evt.Cwd };
+
         if (evt.HookEventName == "SessionEnd")
         {
             _sessions.Remove(evt.SessionId);

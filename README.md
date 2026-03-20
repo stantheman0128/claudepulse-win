@@ -6,10 +6,23 @@ A Windows system tray monitor for [Claude Code](https://claude.ai/claude-code) s
 
 ## Features
 
+### System Tray Icon
+One icon represents **all sessions at once**, showing the most urgent state:
+
+| Color | State | Meaning | Priority |
+|-------|-------|---------|----------|
+| 🔵 Blue | Working | Claude is running (editing, executing, reading) | Highest |
+| 🟠 Orange | Waiting | Claude needs your permission | ↑ |
+| 🟢 Green | Idle | Claude is done, waiting for your input | ↓ |
+| ⚪ Gray | Stale | No activity for 10+ minutes | Lowest |
+
+> If you have 3 sessions and one is Working, the icon is blue. All must be Idle for it to turn green.
+
+### Toast Notifications
+Notifications only fire when Claude **truly stops and waits for you** (3-second debounce filters out intermediate stops). Click the notification to jump directly to that terminal window.
+
 ### Core
-- **System Tray Icon** — Color-coded status at a glance (🟢 idle, 🔵 working, 🟠 waiting, ⚪ stale)
-- **Windows Toast Notifications** — Get notified when Claude finishes working
-- **Multi-Session Tracking** — Monitor multiple Claude Code sessions simultaneously
+- **Multi-Session Tracking** — Monitor multiple Claude Code sessions simultaneously, each with colored status indicator
 - **Auto-Configure Hooks** — Automatically sets up Claude Code HTTP hooks on first launch
 
 ### Beyond the Original
