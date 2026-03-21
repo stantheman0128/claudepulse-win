@@ -2,7 +2,7 @@
 
 ## Project Overview
 Windows system tray application that monitors Claude Code sessions via hooks.
-Built with C# / .NET 6.0 / Windows Forms.
+Built with C# / .NET 10.0 / Windows Forms.
 
 ## Architecture
 - `ClaudePulse/Server/` - HTTP server receiving hook events from Claude Code
