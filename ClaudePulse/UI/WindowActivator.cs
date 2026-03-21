@@ -56,6 +56,33 @@ public static class WindowActivator
 
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
+    /// <summary>
+    /// Check if the session's window is currently in the foreground (user is looking at it).
+    /// Uses the same search strategy as TryActivateSession.
+    /// </summary>
+    public static bool IsSessionWindowFocused(string? cwd)
+    {
+        var foreground = GetForegroundWindow();
+        if (foreground == IntPtr.Zero) return false;
+
+        // Get foreground window title
+        var sb = new StringBuilder(512);
+        GetWindowText(foreground, sb, sb.Capacity);
+        var title = sb.ToString().ToLowerInvariant();
+
+        if (!string.IsNullOrEmpty(cwd))
+        {
+            var folderName = Path.GetFileName(cwd)?.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(folderName) && title.Contains(folderName))
+                return true;
+
+            if (title.Contains(cwd.ToLowerInvariant()))
+                return true;
+        }
+
+        return title.Contains("claude");
+    }
+
     public static bool TryActivateSession(string? cwd, string? sessionId)
     {
         // Strategy 1: Match by project folder name in window title

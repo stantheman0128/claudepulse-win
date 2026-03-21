@@ -30,10 +30,14 @@ public class TrayApplicationContext : ApplicationContext
             var session = _pendingNotifySession;
             if (session != null)
             {
-                _lastNotificationSession = session;
-                _trayIcon.ShowBalloonTip(5000, "Claude Code Ready",
-                    $"{session.ProjectName}: Waiting for your input\n(click to jump)",
-                    ToolTipIcon.Info);
+                // Skip notification if user is already looking at the session window
+                if (!WindowActivator.IsSessionWindowFocused(session.Cwd))
+                {
+                    _lastNotificationSession = session;
+                    _trayIcon.ShowBalloonTip(5000, "Claude Code Ready",
+                        $"{session.ProjectName}: Waiting for your input\n(click to jump)",
+                        ToolTipIcon.Info);
+                }
                 _pendingNotifySession = null;
             }
         };
