@@ -58,7 +58,7 @@ Features that the macOS version doesn't have:
 
 ### Requirements
 - Windows 10/11
-- [.NET 6.0 Runtime](https://dotnet.microsoft.com/download/dotnet/6.0) (check with `dotnet --version`)
+- [.NET 10.0 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (check with `dotnet --version`)
 
 ### Option A: Build from Source
 ```bash
@@ -128,7 +128,7 @@ ClaudePulse/
     └── WindowActivator.cs         # Win32 API force-activate terminal window
 ```
 
-**Zero external dependencies** — built entirely with .NET 6 built-in APIs.
+**Zero external dependencies** — built entirely with .NET 10 built-in APIs.
 
 ## Roadmap
 

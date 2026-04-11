@@ -67,16 +67,21 @@ public static class HookConfigurator
             }
 
             if (!modified)
+            {
+                DiagnosticLog.Info("Hook configuration verified — all hooks already present");
                 return (true, "All hooks already configured");
+            }
 
             // Write back with formatting
             var options = new JsonSerializerOptions { WriteIndented = true };
             File.WriteAllText(path, root.ToJsonString(options));
 
+            DiagnosticLog.Info($"Hooks configured successfully in {path}");
             return (true, "Hooks configured successfully");
         }
         catch (Exception ex)
         {
+            DiagnosticLog.Error("Failed to configure hooks", ex);
             return (false, $"Error: {ex.Message}");
         }
     }

@@ -49,7 +49,7 @@ Wait for user confirmation before tagging.
 - Last tag: check with `git describe --tags --abbrev=0`
 
 ## Code Conventions
-- C# with .NET 6.0, file-scoped namespaces
+- C# with .NET 10.0, file-scoped namespaces
 - Windows Forms for UI (system tray app, no main window)
 - Win32 API via P/Invoke for window management
 - Keep changes minimal and focused

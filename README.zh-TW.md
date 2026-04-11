@@ -49,7 +49,7 @@ Windows 系統匣監控工具，即時追蹤 [Claude Code](https://claude.ai/cla
 
 ### 系統需求
 - Windows 10/11
-- [.NET 6.0 Runtime](https://dotnet.microsoft.com/download/dotnet/6.0)（用 `dotnet --version` 確認）
+- [.NET 10.0 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)（用 `dotnet --version` 確認）
 
 ### 方式 A：從原始碼建置
 ```bash
@@ -64,7 +64,7 @@ dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile
 
 | 檔案 | 大小 | 說明 |
 |------|------|------|
-| **ClaudePulse-lite.exe** | ~179KB | 需要安裝 .NET 6.0 Runtime |
+| **ClaudePulse-lite.exe** | ~179KB | 需要安裝 .NET 10.0 Runtime |
 | **ClaudePulse-standalone.exe** | ~146MB | 不需要安裝任何東西，雙擊即可執行 |
 
 ## 使用方式
@@ -124,7 +124,7 @@ ClaudePulse/
     └── WindowActivator.cs         # Win32 API 強制啟動終端機視窗
 ```
 
-**零外部依賴** — 完全使用 .NET 6 內建 API。
+**零外部依賴** — 完全使用 .NET 10 內建 API。
 
 ## 開發計畫
 

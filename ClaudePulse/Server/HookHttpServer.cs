@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using ClaudePulse.Models;
+using ClaudePulse.Services;
 
 namespace ClaudePulse.Server;
 
@@ -36,10 +37,12 @@ public class HookHttpServer : IDisposable
                 Port = port;
                 _cts = new CancellationTokenSource();
                 _ = ListenLoop(_cts.Token);
+                DiagnosticLog.Info($"HTTP server started on port {port}");
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                DiagnosticLog.Warn($"Port {port} unavailable: {ex.Message}");
                 _listener?.Close();
                 _listener = null;
             }
@@ -82,9 +85,9 @@ public class HookHttpServer : IDisposable
                         _syncContext.Post(_ => OnHookEvent?.Invoke(hookEvent), null);
                     }
                 }
-                catch (JsonException)
+                catch (JsonException ex)
                 {
-                    // Malformed JSON - ignore
+                    DiagnosticLog.Warn($"Malformed JSON in hook event: {ex.Message}");
                 }
             }
 
@@ -92,14 +95,15 @@ public class HookHttpServer : IDisposable
             response.ContentLength64 = 0;
             response.Close();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Connection closed or other error - ignore
+            DiagnosticLog.Error("Error handling HTTP request", ex);
         }
     }
 
     public void Dispose()
     {
+        DiagnosticLog.Info($"HTTP server stopping (port {Port})");
         _cts?.Cancel();
         _listener?.Stop();
         _listener?.Close();
