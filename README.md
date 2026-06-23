@@ -41,12 +41,6 @@ Features that the macOS version doesn't have:
 
 ## Screenshots
 
-<!-- TODO: Add screenshots
-- System tray icon (green/blue states)
-- Toast notification popup
-- Right-click context menu with session list
--->
-
 <img width="612" height="389" alt="image" src="https://github.com/user-attachments/assets/da161885-8fac-4140-bcf3-fe38eeb3b74b" />
 
 <img width="355" height="307" alt="image" src="https://github.com/user-attachments/assets/b017b3b4-f238-44be-9640-6494cb82f421" />
