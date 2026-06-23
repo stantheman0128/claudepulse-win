@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using ClaudePulse.Services;
 
 namespace ClaudePulse.UI;
 
@@ -155,10 +156,16 @@ public static class WindowActivator
                     if (mainWindow != IntPtr.Zero)
                         return ForceActivateWindow(mainWindow);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    DiagnosticLog.Warn($"Failed to access claude process window: {ex.Message}");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            DiagnosticLog.Warn($"Failed to activate by claude process: {ex.Message}");
+        }
 
         return false;
     }
