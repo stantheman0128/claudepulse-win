@@ -131,7 +131,7 @@ ClaudePulse/
 - [ ] **Settings UI** — Configure notification preferences, debounce timing, hook events
 - [ ] **Session History** — Log and browse past sessions
 - [ ] **Global Hotkey** — Keyboard shortcut to show/hide session panel
-- [ ] **GitHub Actions CI** — Automated builds and releases on push
+- [x] **GitHub Actions CI** — Automated builds and releases on push (`.github/workflows/release.yml`)
 
 ## Acknowledgments
 

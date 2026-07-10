@@ -133,7 +133,7 @@ ClaudePulse/
 - [ ] **設定 UI** — 設定通知偏好、debounce 時間、hook 事件
 - [ ] **Session 歷史** — 記錄和瀏覽過往的 session
 - [ ] **全域快捷鍵** — 鍵盤快捷鍵顯示/隱藏 session 面板
-- [ ] **GitHub Actions CI** — push 時自動建置和發布
+- [x] **GitHub Actions CI** — push 時自動建置和發布（`.github/workflows/release.yml`）
 
 ## 致謝
 
