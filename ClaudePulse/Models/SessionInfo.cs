@@ -10,8 +10,11 @@ public class SessionInfo
     public DateTime LastEventTime { get; set; } = DateTime.Now;
     public string? LastToolName { get; set; }
 
+    /// <summary>Truncates a session id to at most 8 chars for display; safe for short ids.</summary>
+    public static string ShortId(string id) => id[..Math.Min(8, id.Length)];
+
     public string ProjectName =>
-        string.IsNullOrEmpty(Cwd) ? Id[..Math.Min(8, Id.Length)] : Path.GetFileName(Cwd)!;
+        string.IsNullOrEmpty(Cwd) ? ShortId(Id) : Path.GetFileName(Cwd)!;
 
     public string ElapsedDisplay
     {

@@ -52,7 +52,7 @@ public class SessionManager
         if (evt.HookEventName == "SessionEnd")
         {
             _sessions.Remove(evt.SessionId);
-            DiagnosticLog.Info($"Session ended: {evt.SessionId[..8]}");
+            DiagnosticLog.Info($"Session ended: {SessionInfo.ShortId(evt.SessionId)}");
             OnStateChanged?.Invoke();
             return new SessionInfo { Id = evt.SessionId, Cwd = evt.Cwd };
         }
@@ -61,7 +61,7 @@ public class SessionManager
         {
             session = new SessionInfo { Id = evt.SessionId, Cwd = evt.Cwd };
             _sessions[evt.SessionId] = session;
-            DiagnosticLog.Info($"New session: {evt.SessionId[..8]} cwd={evt.Cwd}");
+            DiagnosticLog.Info($"New session: {SessionInfo.ShortId(evt.SessionId)} cwd={evt.Cwd}");
         }
 
         session.HandleEvent(evt);
