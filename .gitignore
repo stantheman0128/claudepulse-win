@@ -1,6 +1,10 @@
 bin/
 obj/
 publish/
+publish-lite/
+release-full/
+release-lite/
+test-publish/
 *.user
 *.suo
 .vs/
