@@ -15,6 +15,22 @@ public static class HookConfigurator
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".claude", "settings.json");
 
+    /// <summary>
+    /// Writes settings.json atomically: writes to a temp file in the same
+    /// directory, then swaps it in with File.Replace, keeping the previous
+    /// content as a .bak backup. Never leaves a half-written settings.json.
+    /// </summary>
+    private static void WriteSettings(string path, string content)
+    {
+        var tempPath = path + ".tmp";
+        File.WriteAllText(tempPath, content);
+
+        if (File.Exists(path))
+            File.Replace(tempPath, path, path + ".bak");
+        else
+            File.Move(tempPath, path);
+    }
+
     public static (bool configured, string message) EnsureHooksConfigured(int port)
     {
         var hookUrl = $"http://localhost:{port}/";
@@ -74,7 +90,7 @@ public static class HookConfigurator
 
             // Write back with formatting
             var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(path, root.ToJsonString(options));
+            WriteSettings(path, root.ToJsonString(options));
 
             DiagnosticLog.Info($"Hooks configured successfully in {path}");
             return (true, "Hooks configured successfully");
@@ -100,8 +116,9 @@ public static class HookConfigurator
             return IsHookPresent(hooks, "Stop", hookUrl)
                 && IsHookPresent(hooks, "SessionStart", hookUrl);
         }
-        catch
+        catch (Exception ex)
         {
+            DiagnosticLog.Error("Failed to check hook configuration", ex);
             return false;
         }
     }
@@ -171,12 +188,13 @@ public static class HookConfigurator
             }
 
             var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(path, root!.ToJsonString(options));
+            WriteSettings(path, root!.ToJsonString(options));
 
             return (true, "Hooks removed successfully");
         }
         catch (Exception ex)
         {
+            DiagnosticLog.Error("Failed to remove hooks", ex);
             return (false, $"Error: {ex.Message}");
         }
     }
