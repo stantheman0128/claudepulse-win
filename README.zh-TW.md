@@ -140,6 +140,10 @@ ClaudePulse/
 - [ClaudePulse](https://github.com/tzangms/claudepulse) by [@tzangms](https://github.com/tzangms) — macOS 原版靈感來源
 - 使用 [Claude Code](https://claude.ai/claude-code) 以 Slice-Based Iterative Development 方法開發
 
+## 維護者
+
+Windows 版本由 [Stan Shih（施博瀚 / Po-Han Shih）](https://stan-shih.com/) 維護。
+
 ## 授權
 
 MIT

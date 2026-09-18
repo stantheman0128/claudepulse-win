@@ -138,6 +138,10 @@ ClaudePulse/
 - [ClaudePulse](https://github.com/tzangms/claudepulse) by [@tzangms](https://github.com/tzangms) — the original macOS inspiration
 - Built with [Claude Code](https://claude.ai/claude-code) using Slice-Based Iterative Development
 
+## Maintainer
+
+Windows version maintained by [Stan Shih (施博瀚 / Po-Han Shih)](https://stan-shih.com/).
+
 ## License
 
 MIT
